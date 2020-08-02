@@ -4,6 +4,8 @@ using System.Transactions;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Text;
 
 namespace CommandlineCSHARP
 {
@@ -11,10 +13,9 @@ namespace CommandlineCSHARP
     {
         static void Main(string[] args)
         {
-
             Console.Title = "Mycl";
 
-            string intro = "type 'help' or ? to get help";
+            string intro = "github repo https://github.com/Aihakaiha/clcs \nAuthor: Elias Sivonen\n\ntype 'help' or ? to get help\n";
             string prompt = "<cl> ";
 
             var cmds = new Commands();
@@ -33,7 +34,8 @@ namespace CommandlineCSHARP
                 {"rdir", "removes directory in cd" },
                 {"cfil", "creates file in cd" },
                 {"rfil", "removes file in cd" },
-                {"ls", "lists files in cd" }
+                {"ls", "lists files in cd" },
+                {"read", "reads file and displays content" }
             };
 
             Console.Write(intro);
@@ -155,6 +157,21 @@ namespace CommandlineCSHARP
                         cmds.List_files(cd);
                         break;
 
+                    case "read":
+                        if (newinp.Length == 0 | checker == true)
+                        {
+                            Console.WriteLine("read usage\t\t\t{0, 10}", "read [filename]");
+                            break;
+                        }
+                        else
+                        {
+                            string output = "";
+                            try { output = newinp.Substring(newinp.IndexOf(' ') + 1); } catch { output = ""; }
+                            Console.WriteLine(output);
+                            cmds.Read(cd, newinp, output);
+                            break;
+                        }
+
                     default:
                         Console.WriteLine(cmd + " is not a recognized command");
                         break;
@@ -273,12 +290,12 @@ namespace CommandlineCSHARP
                 {
                     foreach (string dirpath in Directory.GetDirectories(path))
                     {
-                        Console.WriteLine("{0,0}\t\t\t{1,5}",dirpath.Remove(0, path.Length), "<dir>");
+                        Console.WriteLine("{0,0}\t\t\t{1,15}",dirpath.Remove(0, path.Length), "<dir>");
                     }
                     foreach (string filepath in Directory.GetFiles(path))
                     {
                         FileInfo filepathinf = new FileInfo(filepath);
-                        Console.WriteLine("{0,0}\t\t\t{1,5}mb", filepath.Remove(0, path.Length),((filepathinf.Length / 1024f) / 1024f).ToString("0.00"));
+                        Console.WriteLine("{0,0}\t\t\t{1,15}mb", filepath.Remove(0, path.Length),((filepathinf.Length / 1024f) / 1024f).ToString("0.00"));
                         
                     }
                 }
@@ -287,6 +304,34 @@ namespace CommandlineCSHARP
                     Console.WriteLine("Error {0}", e);
                 }
                 
+            }
+        }
+        public void Read(string tpath, string filename, string output)
+        {
+            string path = tpath + filename;
+            Console.WriteLine(output);
+            if (File.Exists(path))
+            {
+                try
+                {
+                    string file = File.ReadAllText(path);
+                    StringBuilder sb = new StringBuilder();
+                    if (output == "")
+                    {
+                        sb.Append(file);
+                        Console.WriteLine(sb.ToString());
+                    }
+                    else
+                    {
+                        File.WriteAllText(tpath + output, file);
+                        Console.WriteLine("Output file created {0}", tpath+output);
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error {0}", e);
+                }
             }
         }
     }
